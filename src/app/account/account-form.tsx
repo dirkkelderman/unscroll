@@ -1,9 +1,19 @@
 "use client";
+
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { type User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import Avatar from "./avatar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function AccountForm({ user }: { user: User | null }) {
   const supabase = createClient();
@@ -17,10 +27,15 @@ export default function AccountForm({ user }: { user: User | null }) {
     try {
       setLoading(true);
 
+      if (!user?.id) {
+        console.log("No user ID available for profile fetch");
+        return;
+      }
+
       const { data, error, status } = await supabase
         .from("profiles")
         .select(`full_name, username, website, avatar_url`)
-        .eq("id", user?.id)
+        .eq("id", user.id)
         .single();
 
       if (error && status !== 406) {
@@ -35,7 +50,7 @@ export default function AccountForm({ user }: { user: User | null }) {
         setAvatarUrl(data.avatar_url);
       }
     } catch (error) {
-      console.log(error);
+      console.error("Profile loading error:", error);
       alert("Error loading user data!");
     } finally {
       setLoading(false);
@@ -56,11 +71,17 @@ export default function AccountForm({ user }: { user: User | null }) {
     website: string | null;
     avatar_url: string | null;
   }) {
+    if (!user?.id) {
+      console.error("No user ID found");
+      alert("Please log in to update your profile");
+      return;
+    }
+
     try {
       setLoading(true);
 
       const { error } = await supabase.from("profiles").upsert({
-        id: user?.id as string,
+        id: user.id,
         full_name: fullname,
         username,
         website,
@@ -78,52 +99,61 @@ export default function AccountForm({ user }: { user: User | null }) {
   }
 
   return (
-    <div className="form-widget">
-      <Avatar
-        uid={user?.id ?? null}
-        url={avatar_url}
-        size={150}
-        onUpload={(url) => {
-          setAvatarUrl(url);
-          updateProfile({ fullname, username, website, avatar_url: url });
-        }}
-      />
+    <Card className="w-[350px]">
+      <CardHeader>
+        <CardTitle>Account Profile</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex justify-center">
+          <Avatar
+            uid={user?.id ?? null}
+            url={avatar_url}
+            onUpload={(url) => {
+              setAvatarUrl(url);
+              updateProfile({ fullname, username, website, avatar_url: url });
+            }}
+          />
+        </div>
 
-      <div>
-        <label htmlFor="email">Email</label>
-        <input id="email" type="text" value={user?.email} disabled />
-      </div>
-      <div>
-        <label htmlFor="fullName">Full Name</label>
-        <input
-          id="fullName"
-          type="text"
-          value={fullname || ""}
-          onChange={(e) => setFullname(e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor="username">Username</label>
-        <input
-          id="username"
-          type="text"
-          value={username || ""}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor="website">Website</label>
-        <input
-          id="website"
-          type="url"
-          value={website || ""}
-          onChange={(e) => setWebsite(e.target.value)}
-        />
-      </div>
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" type="text" value={user?.email ?? ""} disabled />
+        </div>
 
-      <div>
+        <div className="space-y-2">
+          <Label htmlFor="fullName">Full Name</Label>
+          <Input
+            id="fullName"
+            type="text"
+            value={fullname || ""}
+            onChange={(e) => setFullname(e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="username">Username</Label>
+          <Input
+            id="username"
+            type="text"
+            value={username || ""}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="website">Website</Label>
+          <Input
+            id="website"
+            type="url"
+            value={website || ""}
+            onChange={(e) => setWebsite(e.target.value)}
+          />
+        </div>
+      </CardContent>
+
+      <CardFooter className="flex flex-col space-y-2">
         <Button
-          className="button primary block"
+          className="w-full"
           onClick={() =>
             updateProfile({ fullname, username, website, avatar_url })
           }
@@ -131,15 +161,13 @@ export default function AccountForm({ user }: { user: User | null }) {
         >
           {loading ? "Loading ..." : "Update"}
         </Button>
-      </div>
 
-      <div>
-        <form action="/auth/signout" method="post">
-          <Button className="button block" type="submit">
+        <form action="/auth/signout" method="post" className="w-full">
+          <Button className="w-full" type="submit" variant="outline">
             Sign out
           </Button>
         </form>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }

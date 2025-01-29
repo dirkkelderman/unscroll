@@ -1,17 +1,22 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
+import type React from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import {
+  Avatar as AvatarUI,
+  AvatarImage,
+  AvatarFallback,
+} from "@/components/ui/avatar";
 
 export default function Avatar({
   uid,
   url,
-  size,
   onUpload,
 }: {
   uid: string | null;
   url: string | null;
-  size: number;
   onUpload: (url: string) => void;
 }) {
   const supabase = createClient();
@@ -70,31 +75,22 @@ export default function Avatar({
   };
 
   return (
-    <div>
-      {avatarUrl ? (
-        <Image
-          width={size}
-          height={size}
-          src={avatarUrl}
-          alt="Avatar"
-          className="avatar image"
-          style={{ height: size, width: size }}
-        />
-      ) : (
-        <div
-          className="avatar no-image"
-          style={{ height: size, width: size }}
-        />
-      )}
-      <div style={{ width: size }}>
-        <label className="button primary block" htmlFor="single">
-          {uploading ? "Uploading ..." : "Upload"}
-        </label>
+    <div className="flex flex-col items-center space-y-4">
+      <AvatarUI className="h-32 w-32">
+        {avatarUrl ? (
+          <AvatarImage src={avatarUrl} alt="Avatar" />
+        ) : (
+          <AvatarFallback>
+            {uid ? uid.substring(0, 2).toUpperCase() : "NA"}
+          </AvatarFallback>
+        )}
+      </AvatarUI>
+      <div className="relative">
+        <Button variant="outline" className="w-full" disabled={uploading}>
+          {uploading ? "Uploading ..." : "Change Avatar"}
+        </Button>
         <input
-          style={{
-            visibility: "hidden",
-            position: "absolute",
-          }}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           type="file"
           id="single"
           accept="image/*"
