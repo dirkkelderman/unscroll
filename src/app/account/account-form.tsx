@@ -16,6 +16,9 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { deleteAccount } from "./actions";
+import { DeleteAccountDialog } from "./delete-account-dialog";
 
 export default function AccountForm({ user }: { user: User | null }) {
   const supabase = createClient();
@@ -28,6 +31,8 @@ export default function AccountForm({ user }: { user: User | null }) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const { toast } = useToast();
+  const router = useRouter();
+
   const getProfile = useCallback(async () => {
     try {
       setLoading(true);
@@ -137,6 +142,34 @@ export default function AccountForm({ user }: { user: User | null }) {
       toast({
         title: "Error",
         description: "Failed to update password. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      setIsLoading(true);
+
+      const { success, error } = await deleteAccount(user?.id ?? "");
+
+      if (!success) throw error;
+
+      toast({
+        title: "Account deleted",
+        description: "Your account has been permanently deleted.",
+      });
+
+      // Sign out and redirect to home
+      await supabase.auth.signOut();
+      router.push("/");
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: "Failed to delete account. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -264,6 +297,24 @@ export default function AccountForm({ user }: { user: User | null }) {
               {isLoading ? "Updating..." : "Update Password"}
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-destructive">Danger Zone</CardTitle>
+          <CardDescription>
+            Once you delete your account, there is no going back. Please be
+            certain.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <DeleteAccountDialog
+              isLoading={isLoading}
+              onConfirm={handleDeleteAccount}
+            />
+          </div>
         </CardContent>
       </Card>
 
