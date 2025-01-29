@@ -149,7 +149,11 @@ export default function AccountForm({ user }: { user: User | null }) {
       <Card>
         <CardHeader>
           <CardTitle>Profile</CardTitle>
-          <CardDescription>Update your personal information.</CardDescription>
+          <CardDescription>
+            {user?.app_metadata?.provider === "google"
+              ? "Signed in with Google"
+              : "Update your personal information"}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form
@@ -181,7 +185,13 @@ export default function AccountForm({ user }: { user: User | null }) {
                 type="text"
                 value={user?.email ?? ""}
                 disabled
+                className="bg-muted"
               />
+              {user?.app_metadata?.provider === "google" && (
+                <p className="text-xs text-muted-foreground">
+                  Email provided by Google account
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
