@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/utils/supabase/client";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Icons } from "@/components/icons";
@@ -23,7 +23,7 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const { toast } = useToast();
 
