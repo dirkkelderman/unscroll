@@ -1,23 +1,32 @@
-import { UploadSteps } from "./upload-steps";
-import { UploadForm } from "./upload-form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CommentsUploader } from "./comments-uploader";
+import { MediaUploader } from "./media-uploader";
 
 export default function UploadPage() {
   return (
-    <div className="container max-w-4xl py-6 space-y-8">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold">Upload Your Facebook Data</h1>
-        <p className="text-muted-foreground">
-          Follow these steps to download your data from Facebook and upload it
-          to our application.
-        </p>
-      </div>
+    <main className="container max-w-2xl py-6">
+      <h1 className="text-3xl font-bold mb-6">Upload Facebook Data</h1>
 
-      <UploadSteps />
-
-      <div className="border rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Upload Your Data</h2>
-        <UploadForm />
-      </div>
-    </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Choose data type to import</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="comments">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="comments">Comments</TabsTrigger>
+              <TabsTrigger value="media">Photos & Videos</TabsTrigger>
+            </TabsList>
+            <TabsContent value="comments">
+              <CommentsUploader />
+            </TabsContent>
+            <TabsContent value="media">
+              <MediaUploader />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+    </main>
   );
 }

@@ -19,7 +19,7 @@ export default async function FeedPage() {
       <h1 className="text-3xl font-bold mb-6" suppressHydrationWarning>
         Memories from {today.toLocaleDateString("nl-NL", { month: "long" })}
       </h1>
-      <ReminderFeed reminders={reminders || []} today={today} />
+      <ReminderFeed reminders={reminders || []} />
     </main>
   );
 }
